@@ -1,0 +1,5 @@
+include README.md
+include LICENSE
+include src/classic_yr/py.typed
+recursive-include src *.py
+recursive-include tests *.py
