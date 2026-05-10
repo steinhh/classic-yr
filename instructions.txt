@@ -1,0 +1,12 @@
+This package will be used to fetch weather data from the Yr weather service, described here:
+
+* https://developer.yr.no/doc/GettingStarted/
+* https://developer.yr.no/doc/TermsOfService/
+
+Read both web pages carefully, in particular the Terms of Service, and make sure to follow all requirements and restrictions when implementing the package.
+
+Implement a python script that will fetch weather forecasts for Oslo, Norway and store the information in a flat CSV file called yr, with a 1-hour time resolution. When the script is re-run, it should update the CSV file with new data, without duplicating existing data. The script should be idempotent, meaning that running it multiple times should not change the results after the first run. Store the responses in files located in the data/responses directory, with filenames that include the timestamp of when the data was fetched and the location. The CSV file should be stored in the data directory as data/yr.csv.
+
+Note that the script MUST FOLLOW THE TERMS OF SERVICE, in particular the request limits, UA string requirements, and caching rules.
+
+Create a file called compliance.md specifying how the package complies with the requirements and restrictions in the Terms of Service.
