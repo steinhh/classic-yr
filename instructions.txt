@@ -10,3 +10,38 @@ Implement a python script that will fetch weather forecasts for Oslo, Norway and
 Note that the script MUST FOLLOW THE TERMS OF SERVICE, in particular the request limits, UA string requirements, and caching rules.
 
 Create a file called compliance.md specifying how the package complies with the requirements and restrictions in the Terms of Service.
+
+
+
+I moved the data directory to be in the same folder as the script.
+
+Now I want to make plot.py, which will accept 1 command line argument specifying the location for which to plot, defaulting to oslo.
+
+The plot should show the forecast for the next 7 days, and should be in a long format (let's say 7:1).
+
+The plot should be on a dark background, with time going horisontally, with dashed lines indicating the day boundaries, and there should be weaker, dotted lines indicating every 2 hours of the day. The day names should be indicated below the hour numbers.
+
+The left axis indicates temperature, adjusted to the range present in the data. The right axis specifies precipitation in mm.
+
+The left and right axes must be aligned so a single dotted-line grid can be drawn.
+
+The temperature should be plotted as a smoothed line as a function of time (with some form of nonlinear interpolation) using the available time resolution. The line should be red for temperatures above freezing, and blue for temperatures below freezing.
+
+The precipitation should be indicated as a bar chart in light blue solid fill for precipitation_1h, and a striped fill for maximum precipitation.
+
+
+Below the graph, between the hours and the day names, I want Beaufort-style wind indicators showing wind direction and strength. Use an arrow tip instead of a traditional circle.
+
+You will need to modify the aspect ratio, about twice as high as it is now
+
+
+
+Make the temperature go in front of the precipitation bars.
+
+I also want symbols every two hours at the top (but inside the plot area) indicating full sun, partially cloudy and cloudy (UTF-8 symbols: ??, ?, ??) based on the cloud cover percentage (0-20% = full sun, 20-80% = partially cloudy, 80-100% = cloudy). To indicate rain, use (???)
+You'll need to make the plot taller, try adding 50% to the height.
+
+
+Below the graph, between the hours and the day names, I want Beaufort-style wind indicators showing wind direction and strength. Use an arrow tip instead of a traditional circle.
+
+You will need to modify the aspect ratio, about twice as high as it is now

@@ -11,7 +11,7 @@ from email.utils import parsedate_to_datetime
 from pathlib import Path
 from typing import Any, cast
 
-import requests  # type: ignore[import-untyped]
+import requests  #  type: ignore [import-untyped]
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
@@ -194,13 +194,14 @@ def fetch_forecast(
 
 
 def parse_timeseries(data: dict[str, Any]) -> list[dict[str, str]]:
-    """Extract hourly rows from a forecast API response.
+    """Extract forecast rows from a forecast API response.
 
-    Only entries that include ``next_1_hours`` data are included, which
-    ensures true 1-hour resolution rows.
+    Entries with ``next_1_hours`` are preferred (first ~48 h).  For later
+    time-steps the API only provides ``next_6_hours``; those are included too
+    so that 7-day plots have enough data points.
 
     Args:
-        data: Parsed JSON response from the Yr compact API.
+        data: Parsed JSON response from the Yr API.
 
     Returns:
         List of row dicts keyed by CSV_FIELDS.
@@ -212,11 +213,14 @@ def parse_timeseries(data: dict[str, Any]) -> list[dict[str, str]]:
         time: str = entry.get("time", "")
         instant: dict[str, Any] = entry.get("data", {}).get("instant", {}).get("details", {})
         next_1h: dict[str, Any] = entry.get("data", {}).get("next_1_hours", {})
+        next_6h: dict[str, Any] = entry.get("data", {}).get("next_6_hours", {})
 
-        if not next_1h:
+        # Prefer 1-hour summary; fall back to 6-hour summary.
+        summary_block = next_1h if next_1h else next_6h
+        if not summary_block:
             continue
 
-        next_1h_details: dict[str, Any] = next_1h.get("details", {})
+        summary_details: dict[str, Any] = summary_block.get("details", {})
         rows.append(
             {
                 "time": time,
@@ -241,19 +245,19 @@ def parse_timeseries(data: dict[str, Any]) -> list[dict[str, str]]:
                 "cloud_area_fraction_low": str(instant.get("cloud_area_fraction_low", "")),
                 "fog_area_fraction": str(instant.get("fog_area_fraction", "")),
                 "ultraviolet_index_clear_sky": str(instant.get("ultraviolet_index_clear_sky", "")),
-                # Next-1-hour summary
-                "symbol_code": next_1h.get("summary", {}).get("symbol_code", ""),
-                "precipitation_1h": str(next_1h_details.get("precipitation_amount", "")),
+                # Precipitation summary (1 h when available, else 6 h block)
+                "symbol_code": summary_block.get("summary", {}).get("symbol_code", ""),
+                "precipitation_1h": str(summary_details.get("precipitation_amount", "")),
                 "precipitation_amount_min": str(
-                    next_1h_details.get("precipitation_amount_min", "")
+                    summary_details.get("precipitation_amount_min", "")
                 ),
                 "precipitation_amount_max": str(
-                    next_1h_details.get("precipitation_amount_max", "")
+                    summary_details.get("precipitation_amount_max", "")
                 ),
                 "probability_of_precipitation": str(
-                    next_1h_details.get("probability_of_precipitation", "")
+                    summary_details.get("probability_of_precipitation", "")
                 ),
-                "probability_of_thunder": str(next_1h_details.get("probability_of_thunder", "")),
+                "probability_of_thunder": str(summary_details.get("probability_of_thunder", "")),
             }
         )
 
