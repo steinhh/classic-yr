@@ -225,7 +225,7 @@ def _draw_wind_arrow(
             break
 
     # Shaft: centred on (x_ax, y_ax), half-length = half_n * shaft_l
-    shaft_l = 0.0042
+    shaft_l = 0.00294
     half_n = 1.65
     dx = shaft_l * np.cos(to_angle)
     dy = shaft_l * np.sin(to_angle) / ar
@@ -247,19 +247,47 @@ def _draw_wind_arrow(
     )
     ax.add_patch(arrow)
 
-    # Barbs spaced evenly from tail to centre so the last barb meets the tail
-    barb_dx = (-np.sin(to_angle) * 0.0034) - (np.cos(to_angle) * 0.0014)
-    barb_dy = (np.cos(to_angle) * 0.0034 / ar) - (np.sin(to_angle) * 0.0014 / ar)
+    # Beaufort barb encoding: each 2 Beaufort = 1 full barb; odd = extra half barb.
+    # Half barb occupies the innermost slot (closest to arrowhead).
+    # Bft 1: no barbs; Bft 2: half; Bft 3: 1 full; Bft 4: 1 full+half; Bft 5: 2 full ...
+    n_full = (force - 1) // 2 if force >= 1 else 0
+    n_half = (force - 1) % 2 if force >= 1 else 0
 
-    step_dx = dx * half_n / max(1, force)
-    step_dy = dy * half_n / max(1, force)
+    n_total = n_full + n_half
+    if n_total == 0:
+        return
 
-    for i in range(force):
+    # Step along shaft between barb positions (tail ? centre direction)
+    step_frac = 0.28  # in units of shaft_l
+    step_dx = dx * step_frac
+    step_dy = dy * step_frac
+
+    # Barbs are strictly perpendicular to the shaft
+    full_barb_len = shaft_l * 0.75
+    perp_dx = -np.sin(to_angle) * full_barb_len
+    perp_dy = np.cos(to_angle) * full_barb_len / ar
+
+    # Draw full barbs at positions 0 ? n_full-1 (outermost slots from tail)
+    for i in range(n_full):
         bx = tail_x + i * step_dx
         by = tail_y + i * step_dy
         ax.plot(
-            [bx, bx + barb_dx],
-            [by, by + barb_dy],
+            [bx, bx + perp_dx],
+            [by, by + perp_dy],
+            color="lightgray",
+            linewidth=0.7,
+            transform=ax.transAxes,
+            zorder=6,
+            clip_on=False,
+        )
+
+    # Draw half barb at slot n_full (innermost ? closest to arrowhead)
+    if n_half:
+        bx = tail_x + n_full * step_dx
+        by = tail_y + n_full * step_dy
+        ax.plot(
+            [bx, bx + perp_dx * 0.5],
+            [by, by + perp_dy * 0.5],
             color="lightgray",
             linewidth=0.7,
             transform=ax.transAxes,
