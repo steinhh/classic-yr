@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 import numpy as np
 import pandas as pd
-from matplotlib.patches import Ellipse
+from matplotlib.patches import Ellipse, FancyArrowPatch
 from scipy.interpolate import CubicSpline
 
 
@@ -51,6 +51,8 @@ def _load_forecast(location: str, days: int = 7) -> pd.DataFrame:
         "precipitation_1h",
         "precipitation_amount_min",
         "precipitation_amount_max",
+        "wind_speed",
+        "wind_from_direction",
     ):
         if col in df.columns:
             df[col] = pd.to_numeric(df[col], errors="coerce")
@@ -184,6 +186,84 @@ def _draw_weather_symbol(
         _draw_cloud(ax, x_ax + r * 0.12, y_ax - r / ar * 0.12, r * 0.9, ar, "white")
     else:
         _draw_cloud(ax, x_ax, y_ax, r, ar, "lightgray")
+
+
+def _draw_wind_arrow(
+    ax: Any,
+    x_ax: float,
+    y_ax: float,
+    speed_ms: float,
+    wind_dir_deg: float,
+    ar: float,
+) -> None:
+    """Draw a Beaufort-style wind arrow.
+
+    If calm, draws a circle.
+    Otherwise draws an arrow with barbs indicating Beaufort force.
+    """
+    if speed_ms < 0.3:
+        ax.plot(
+            x_ax,
+            y_ax,
+            marker="o",
+            color="lightgray",
+            markersize=3,
+            transform=ax.transAxes,
+            zorder=6,
+            clip_on=False,
+            fillstyle="none",
+        )
+        return
+
+    to_angle = np.radians(270 - wind_dir_deg)
+
+    thresholds = [0.3, 1.6, 3.4, 5.5, 8.0, 10.8, 13.9, 17.2, 20.8, 24.5, 28.5, 32.7]
+    force = 12
+    for i, t in enumerate(thresholds):
+        if speed_ms < t:
+            force = i
+            break
+
+    # Shaft half-length (decreased overall size by ~30%)
+    shaft_l = 0.0042
+    dx = shaft_l * np.cos(to_angle)
+    dy = shaft_l * np.sin(to_angle) / ar
+
+    # Extend tail backwards a bit more so the barbs fit nicely
+    tail_x, tail_y = x_ax - dx * 1.9, y_ax - dy * 1.9
+    tip_x, tip_y = x_ax + dx, y_ax + dy
+
+    arrow = FancyArrowPatch(
+        (tail_x, tail_y),
+        (tip_x, tip_y),
+        transform=ax.transAxes,
+        arrowstyle="-|>,head_width=1.5,head_length=2.5",
+        color="lightgray",
+        linewidth=0.7,
+        zorder=6,
+        clip_on=False,
+    )
+    ax.add_patch(arrow)
+
+    # Smaller barbs (~30% smaller than previous)
+    barb_dx = (-np.sin(to_angle) * 0.0034) - (np.cos(to_angle) * 0.0014)
+    barb_dy = (np.cos(to_angle) * 0.0034 / ar) - (np.sin(to_angle) * 0.0014 / ar)
+
+    step_dx = dx * 2 / max(1, force) * 0.8
+    step_dy = dy * 2 / max(1, force) * 0.8
+
+    for i in range(force):
+        bx = tail_x + i * step_dx
+        by = tail_y + i * step_dy
+        ax.plot(
+            [bx, bx + barb_dx],
+            [by, by + barb_dy],
+            color="lightgray",
+            linewidth=0.7,
+            transform=ax.transAxes,
+            zorder=6,
+            clip_on=False,
+        )
 
 
 def _aligned_precip_ylim(
@@ -360,7 +440,7 @@ def plot_forecast(location: str) -> None:
                 fontsize=7,
                 color="lightgray",
                 annotation_clip=False,
-                xytext=(0, -18),  # 18 points below the x-axis
+                xytext=(0, -38),  # Push further down
                 textcoords="offset points",
             )
         d += timedelta(days=1)
@@ -430,6 +510,20 @@ def plot_forecast(location: str) -> None:
             else 0.0
         )
         _draw_weather_symbol(ax_t, x_ax, 0.93, ar, cloud, precip_val)
+
+        if "wind_speed" in df.columns and "wind_from_direction" in df.columns:
+            w_speed = (
+                float(df["wind_speed"].iloc[nearest_idx])
+                if pd.notna(df["wind_speed"].iloc[nearest_idx])
+                else 0.0
+            )
+            w_dir = (
+                float(df["wind_from_direction"].iloc[nearest_idx])
+                if pd.notna(df["wind_from_direction"].iloc[nearest_idx])
+                else 0.0
+            )
+            _draw_wind_arrow(ax_t, x_ax, -0.075, w_speed, w_dir, ar)
+
         sym_day += timedelta(hours=2)
 
     plt.show()
