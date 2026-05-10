@@ -6,20 +6,15 @@ This is a Python package for classic yr weather data plotting. The package follo
 
 ## Code Style & Formatting
 
-- **Line length**: 100 characters (enforced by Black)
 - **Type hints**: Required for all function parameters and return values
 - **Docstrings**: Use Google style for all public functions and classes
-- **Imports**: Use absolute imports, organized by isort (via Ruff)
 - **Formatting**: Black is the authoritative formatter
 
 ## Python Standards
 
-- **Python version**: Support Python 3.9+
+- **Python version**: Support Python 3.13+
 - **Type checking**: All code must pass mypy in strict mode
 - **Naming**: Follow PEP 8 conventions
-  - Functions/variables: `snake_case`
-  - Classes: `PascalCase`
-  - Constants: `UPPER_SNAKE_CASE`
 
 ## Project Structure
 
@@ -32,20 +27,9 @@ tests/             # Mirror the src structure for tests
 - Use relative imports within the package
 - Export public APIs in `__init__.py`
 
-## Testing Requirements
-
-- Write pytest tests for all new functions
-- Test files: `test_*.py` or `*_test.py`
-- Use type hints in test functions
-- Aim for 100% code coverage
-- Use fixtures for shared test setup
-- Mock external dependencies
-
 ## Dependencies
 
-- Minimize external dependencies
 - Add runtime dependencies to `dependencies` in `pyproject.toml`
-- Add dev dependencies to `[project.optional-dependencies] dev`
 - Specify minimum versions: `package>=X.Y.Z`
 
 ## Common Patterns
@@ -97,14 +81,15 @@ def read_data(filepath: Path) -> str:
 
 ## Pre-commit Checks
 
-Before committing, the following run automatically:
+Before committing, the following run the following checks:
+
 - Black formatting
 - Ruff linting
 - Mypy type checking
 - YAML/TOML validation
 - Trailing whitespace removal
 
-Fix any issues before committing.
+If any checks fail, fix the issues but do not commit, and issue a warning.
 
 ## Documentation
 
@@ -115,15 +100,17 @@ Fix any issues before committing.
 
 ## Developer-added instructions (do not modify or delete)
 
+Don't assume. Don't hide confusion. Surface tradeoffs.
+
+Minimum code that solves the problem. Nothing speculative.
+
 When creating binary executable files, use file extension `.exe` to avoid confusion with source files.
 
 Use a terse style for the README files, try to avoid duplication of information.
 
 Use redirect to top-level file dev_null.txt instead of redirecting to /dev/null, since such redirects cannot be auto-approved by copilot.
 
-Warn me when I'm introducing new features that warrant an increment of the major version number.
-
-Warn me if I'm changing the public API in a way that is not backward compatible.
+Warn me if I remove or modify existing public methods or classes in a way that breaks existing functionality
 
 Favour replace_string_in_file/multi_replace_string_in_file over sed for string replacements in files, since replace_string_in_file is auto-approved by copilot.
 
