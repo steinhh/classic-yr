@@ -22,24 +22,44 @@ LAT = 59.9139
 LON = 10.7522
 ALTITUDE = 23  # metres above sea level
 
-API_URL = "https://api.met.no/weatherapi/locationforecast/2.0/compact"
+API_URL = "https://api.met.no/weatherapi/locationforecast/2.0/complete"
 
 # Identifies this application per Yr Terms of Service: must include app name and contact info.
 USER_AGENT = "classic-yr/0.1.0 https://github.com/steinhh/classic-yr"
 
 CSV_FIELDS = [
     "time",
+    # Instant variables
     "air_temperature",
-    "precipitation_1h",
+    "air_temperature_percentile_10",
+    "air_temperature_percentile_90",
+    "dew_point_temperature",
+    "relative_humidity",
+    "air_pressure_at_sea_level",
     "wind_speed",
+    "wind_speed_percentile_10",
+    "wind_speed_percentile_90",
     "wind_from_direction",
+    "cloud_area_fraction",
+    "cloud_area_fraction_high",
+    "cloud_area_fraction_medium",
+    "cloud_area_fraction_low",
+    "fog_area_fraction",
+    "ultraviolet_index_clear_sky",
+    # Next-1-hour summary
     "symbol_code",
+    "precipitation_1h",
+    "precipitation_amount_min",
+    "precipitation_amount_max",
+    "probability_of_precipitation",
+    "probability_of_thunder",
 ]
 
 
 def _data_dir() -> Path:
-    """Return the data directory (relative to CWD)."""
-    return Path.cwd() / "data"
+    """Return the top-level data directory (always relative to the location of the script)."""
+    # fetch.py lives at <root>/src/classic_yr/fetch.py ? parents[2] is <root>
+    return Path(__file__).resolve().parents[0] / "data"
 
 
 def _find_cached_response(
@@ -113,7 +133,7 @@ def fetch_forecast(
         requests.HTTPError: If the server returns an error status.
         requests.RequestException: On network or connection failure.
     """
-    responses_dir = _data_dir() / "responses"
+    responses_dir = _data_dir() / location / "responses"
     responses_dir.mkdir(parents=True, exist_ok=True)
 
     cached_file, metadata = _find_cached_response(responses_dir, location)
@@ -196,14 +216,44 @@ def parse_timeseries(data: dict[str, Any]) -> list[dict[str, str]]:
         if not next_1h:
             continue
 
+        next_1h_details: dict[str, Any] = next_1h.get("details", {})
         rows.append(
             {
                 "time": time,
+                # Instant variables
                 "air_temperature": str(instant.get("air_temperature", "")),
-                "precipitation_1h": str(next_1h.get("details", {}).get("precipitation_amount", "")),
+                "air_temperature_percentile_10": str(
+                    instant.get("air_temperature_percentile_10", "")
+                ),
+                "air_temperature_percentile_90": str(
+                    instant.get("air_temperature_percentile_90", "")
+                ),
+                "dew_point_temperature": str(instant.get("dew_point_temperature", "")),
+                "relative_humidity": str(instant.get("relative_humidity", "")),
+                "air_pressure_at_sea_level": str(instant.get("air_pressure_at_sea_level", "")),
                 "wind_speed": str(instant.get("wind_speed", "")),
+                "wind_speed_percentile_10": str(instant.get("wind_speed_percentile_10", "")),
+                "wind_speed_percentile_90": str(instant.get("wind_speed_percentile_90", "")),
                 "wind_from_direction": str(instant.get("wind_from_direction", "")),
+                "cloud_area_fraction": str(instant.get("cloud_area_fraction", "")),
+                "cloud_area_fraction_high": str(instant.get("cloud_area_fraction_high", "")),
+                "cloud_area_fraction_medium": str(instant.get("cloud_area_fraction_medium", "")),
+                "cloud_area_fraction_low": str(instant.get("cloud_area_fraction_low", "")),
+                "fog_area_fraction": str(instant.get("fog_area_fraction", "")),
+                "ultraviolet_index_clear_sky": str(instant.get("ultraviolet_index_clear_sky", "")),
+                # Next-1-hour summary
                 "symbol_code": next_1h.get("summary", {}).get("symbol_code", ""),
+                "precipitation_1h": str(next_1h_details.get("precipitation_amount", "")),
+                "precipitation_amount_min": str(
+                    next_1h_details.get("precipitation_amount_min", "")
+                ),
+                "precipitation_amount_max": str(
+                    next_1h_details.get("precipitation_amount_max", "")
+                ),
+                "probability_of_precipitation": str(
+                    next_1h_details.get("probability_of_precipitation", "")
+                ),
+                "probability_of_thunder": str(next_1h_details.get("probability_of_thunder", "")),
             }
         )
 
@@ -250,8 +300,8 @@ def update_csv(new_rows: list[dict[str, str]], csv_path: Path) -> int:
 
 
 def main() -> None:
-    """Fetch Yr weather forecast for Oslo and update data/yr.csv."""
-    csv_path = _data_dir() / "yr.csv"
+    """Fetch Yr weather forecast for Oslo and update data/oslo/yr.csv."""
+    csv_path = _data_dir() / LOCATION_NAME / "yr.csv"
 
     try:
         data = fetch_forecast()

@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Locationforecast</title>
+  <link rel="alternate" type="application/rss+xml" title="News RSS" href="/feed/news">
+  <link rel="alternate" type="application/rss+xml" title="Global changelog RSS" href="/feed/changelog">
+  <link type="image/x-icon" rel="icon" href="/images/met_favicon.png">
+  <link type="image/x-icon" rel="shortcut icon" href="/images/met_favicon.ico">
+
+  <!-- bootstrap 5 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <meta http-equiv="x-ua-compatible" content="ie=edge" />
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.11.2/css/all.css" />
+  <!-- Google Fonts Roboto -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" />
+  <!-- MDB -->
+  <link rel="stylesheet" href="/css/mdb.min.css" />
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.1.0/mdb.min.js"></script>
+
+  <!-- Custom styles -->
+  <link rel="stylesheet" href="/css/style.css" />
+
+  <link rel="alternate" type="application/rss+xml" title="Product changelog RSS" href="https://api.met.no/weatherapi/locationforecast/2.0/_/changelog">
+  <link href='/swagger-ui/css/typography.css' media='screen' rel='stylesheet' type='text/css'/>
+<link href='/swagger-ui/css/screen.css' media='screen' rel='stylesheet' type='text/css'/>
+<link href='/swagger-ui/css/reset.css' media='print' rel='stylesheet' type='text/css'/>
+<link href='/swagger-ui/css/print.css' media='print' rel='stylesheet' type='text/css'/>
+
+<script src='/swagger-ui/lib/object-assign-pollyfill.js' type='text/javascript'></script>
+<script src='/swagger-ui/lib/jquery-1.8.0.min.js' type='text/javascript'></script>
+<script src='/swagger-ui/lib/jquery.slideto.min.js' type='text/javascript'></script>
+<script src='/swagger-ui/lib/jquery.wiggle.min.js' type='text/javascript'></script>
+<script src='/swagger-ui/lib/jquery.ba-bbq.min.js' type='text/javascript'></script>
+<script src='/swagger-ui/lib/handlebars-4.0.5.js' type='text/javascript'></script>
+<script src='/swagger-ui/lib/lodash.min.js' type='text/javascript'></script>
+<script src='/swagger-ui/lib/backbone-min.js' type='text/javascript'></script>
+<script src='/swagger-ui/swagger-ui.js' type='text/javascript'></script>
+<script src='/swagger-ui/lib/highlight.9.1.0.pack.js' type='text/javascript'></script>
+<script src='/swagger-ui/lib/highlight.9.1.0.pack_extended.js' type='text/javascript'></script>
+<script src='/swagger-ui/lib/jsoneditor.min.js' type='text/javascript'></script>
+<script src='/swagger-ui/lib/marked.js' type='text/javascript'></script>
+<script src='/swagger-ui/lib/swagger-oauth.js' type='text/javascript'></script>
+
+<style type="text/css">
+  .swagger-section ul#resources { padding-left: 0px; }
+  .swagger-section #api_info { display: none }
+  .swagger-section #message-bar { min-height: 0px; }
+  #swagger-form #input_baseUrl { width: 100px }
+</style>
+
+
+</head>
+<body>
+  <header>
+    <!-- Intro settings -->
+    <style>
+      #intro {
+        /* Margin to fix overlapping fixed navbar */
+        margin-top: 58px;
+      }
+      @media (max-width: 991px) {
+        #intro {
+          /* Margin to fix overlapping fixed navbar */
+          margin-top: 45px;
+        }
+      }
+    </style>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-met-pri fixed-top">
+      <div class="container-fluid">
+        <!-- Navbar brand -->
+        <a class="navbar-brand" target="_blank" href="https://met.no/">
+          <img src="/img/met_logo_icon_neg.png" height="24" alt="MET logo" loading="lazy"/>
+        </a>
+        <button class="navbar-toggler" type="button" data-mdb-toggle="collapse" data-mdb-target="#navbarExample01"
+          aria-controls="navbarExample01" aria-expanded="false" aria-label="Toggle navigation">
+          <i class="fas fa-bars"></i>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarExample01">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item active">
+              <a class="nav-link" aria-current="page" href="/">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://docs.api.met.no/doc/">Documentation</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/weatherapi/">API Reference</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/doc/FAQ">FAQ</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/doc/License">License</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/doc/TermsOfService">Terms of Service</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/doc/support">Contact us</a>
+            </li>
+          </ul>
+        </div>
+        <a class="icon" href="/weatherapi/healthz"><img src='/weatherapi/healthz?icon' height='15px' alt="Healthz status" ></a>
+        <a class="icon" href="/feed/changelog"><img src="/images/16px-Rss-feed.svg.png" alt="Changelog RSS" /></a>
+      </div>
+    </nav>
+    <!-- Navbar -->
+
+    <!-- Jumbotron -->
+    <div id="intro" class="p-4 text-center bg-met-light">
+      <h1 class="mb-1">Locationforecast</h1>
+    </div>
+    <!-- Jumbotron -->
+
+    <!--alert-->
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-exclamation-triangle-fill flex-shrink-0 me-2" viewBox="0 0 16 16" role="img" aria-label="Warning:">
+             <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+          </svg>
+          Are you getting 403 Forbidden errors? Read the <a href="/doc/FAQ">FAQ</a> and check your User-Agent header!
+
+        </div>
+
+  </header>
+  <!--Main Navigation-->
+
+  <!--Main layout-->
+  <main class="my-5">
+    <div class="container">
+      <!--Section: Content-->
+
+<div class="row">
+  <div class="col-md">
+    <div class="card px-3 py-3 product">
+
+
+<!-- Tabs navs -->
+<ul class="nav nav-tabs mb-3" id="ex1" role="tablist">
+  <li class="nav-item" role="presentation">
+    <a
+      class="nav-link active"
+      id="ex1-tab-1"
+      data-mdb-toggle="tab"
+      href="#ex1-tabs-1"
+      role="tab"
+      aria-controls="ex1-tabs-1"
+      aria-selected="true"
+    >Documentation</a>
+  </li>
+  <li class="nav-item" role="presentation">
+    <a
+      class="nav-link"
+      id="ex1-tab-2"
+      data-mdb-toggle="tab"
+      href="#ex1-tabs-2"
+      role="tab"
+      aria-controls="ex1-tabs-2"
+      aria-selected="false"
+    >OpenAPI UI</a>
+  </li>
+  <li class="nav-item" role="presentation">
+    <a
+      class="nav-link"
+      id="ex1-tab-3"
+      data-mdb-toggle="tab"
+      href="#ex1-tabs-3"
+      role="tab"
+      aria-controls="ex1-tabs-3"
+      aria-selected="false"
+    >Changelog</a>
+  </li>
+  <li class="nav-item" role="presentation">
+    <a
+      class="nav-link"
+      id="ex1-tab-4"
+      data-mdb-toggle="tab"
+      href="#ex1-tabs-4"
+      role="tab"
+      aria-controls="ex1-tabs-4"
+      aria-selected="false"
+    >Other resources</a>
+  </li>
+</ul>
+<!-- Tabs navs -->
+
+<!-- Tabs content -->
+<div class="tab-content" id="ex1-content">
+
+  <div class="tab-pane fade show active pod documentation" id="ex1-tabs-1" role="tabpanel" aria-labelledby="ex1-tab-1">
+
+    <script src='https://unpkg.com/maplibre-gl@latest/dist/maplibre-gl.js'></script>
+    <link href='https://unpkg.com/maplibre-gl@latest/dist/maplibre-gl.css' rel='stylesheet' />
+    <script src="https://unpkg.com/maplibre-grid@1.0.0/dist/maplibre-grid.js"></script>
+    <div class="btn-group layerselector">
+        <input type="radio" class="btn-check" name="layers" id="select_locations" onclick="showLayer('locations')" autocomplete="off" />
+<label class="btn btn-secondary" for="select_locations" data-mdb-ripple-init>LOCATIONS</label>
+    </div>
+    <div id='map' style='width: 100%; height: 500px; margin-bottom: 24px;'></div>
+    <style>
+        .maplibregl-popup { max-height: 400px !important; }
+        .maplibregl-popup-content { overflow: auto !important }
+        .maplibregl-popup td { vertical-align: top; padding-right: 12px; }
+        .maplibregl-popup td.popval { word-wrap: anywhere; }
+        .maplibregl-popup h3 { font-weight: bold; font-size: 14px; }
+        .layerselector { float: right; margin: 5px 5px -50px; z-index: 9999; }
+        .layerselector .btn-secondary { background-color: #496C80; }
+        .btn-check:checked + .btn-secondary{ background-color: #0090A8; }
+        .maplibregl-ctrl-bottom-left { padding: 2px 8px 2px 8px; background: rgba(255,255,255,0.7); }
+    </style>
+    <script>
+        var map = new maplibregl.Map({
+            container: 'map',
+            style: 'https://osm.api.met.no/styles/basic-preview/style.json',
+center: [15, 65], // starting position [lng, lat]
+            zoom:1// starting zoom
+        });
+        // Add zoom and rotation controls to the map.
+        map.addControl(new maplibregl.NavigationControl({
+            //visualizePitch: true,
+            //visualizeRoll: true,
+            showZoom: true,
+            showCompass: true
+        }));
+        map.addControl(new MaplibreGrid.Grid({
+            gridWidth: 10,
+            gridHeight: 10,
+            units: 'degrees',
+            paint: { 'line-opacity': 0.2 }
+        }));
+        map.on('load', () => {
+
+            map.addSource('locations', {
+'type': 'geojson',
+                'data': 'https://api.met.no/weatherapi/locationforecast/2.0/locations.json'
+});
+            map.addLayer({
+                'id': 'locations_areas',
+'type': 'fill',
+                'source': 'locations',
+'filter': ['==', "$type", "Polygon"],
+                'layout': { 'visibility': "none" },
+                'paint': {
+                    'fill-color': '#c93',
+                    'fill-opacity': 0.25,
+                    'fill-outline-color': '#933'
+                }
+            });
+            map.addLayer({
+                'id': 'locations_routes',
+'type': 'line',
+                'source': 'locations',
+'filter': ['==', "$type", "LineString"],
+                'layout': { 'visibility': "none" },
+                'paint': {
+                    'line-color': '#c63',
+                    'line-width': 2,
+                    'line-opacity': 0.5
+                }
+            });
+            map.addLayer({
+                'id': 'locations_locations',
+'type': 'circle',
+                'source': 'locations',
+'filter': ['==', "$type", "Point"],
+                'layout': { 'visibility': "none" },
+                'paint': {
+                    'circle-color': '#933',
+                    'circle-radius': 5,
+                    'circle-stroke-width': 1,
+                    'circle-stroke-color': '#fff'
+                }
+            });
+            map.on('click', 'locations_areas', popup);
+map.on('click', 'locations_routes', popup);
+map.on('click', 'locations_locations', popup);
+            showLayer('locations');
+/* show coords in lower left corner of map */
+            map.on('mousemove', (e) => {
+                document.getElementById('map')
+                .getElementsByClassName("maplibregl-control-container")[0]
+                .getElementsByClassName("maplibregl-ctrl-bottom-left")[0]
+                .innerHTML = `${e.lngLat.lng.toFixed(4)} ${e.lngLat.lat.toFixed(4)}`;
+            });
+        });
+        function showLayer(l) {
+            map.setLayoutProperty('locations_areas', 'visibility', 'none');
+map.setLayoutProperty('locations_routes', 'visibility', 'none');
+map.setLayoutProperty('locations_locations', 'visibility', 'none');
+            map.setLayoutProperty(l + '_areas', 'visibility', 'visible');
+            map.setLayoutProperty(l + '_routes', 'visibility', 'visible');
+            map.setLayoutProperty(l + '_locations', 'visibility', 'visible');
+            document.getElementById('select_' + l).checked = true;
+        }
+        function popup(e){
+            new maplibregl.Popup()
+            .setLngLat(e.lngLat)
+            .setHTML(popupText(e))
+            .setMaxWidth("480px")
+            .addTo(map);
+        };
+        function popupText(e) {
+            //alert(JSON.stringify(e.features, null, 4));
+
+            //var selected = 0;
+            var values = {
+                "lat": e.lngLat.lat,
+                "lon": e.lngLat.lng
+            };
+            var html = '';
+            //html += '<p>' + values.lat.toFixed(3) + ',' + values.lon.toFixed(3) + '</p>';
+
+            for (const feature of e.features) {
+                html += '<div class="feature"><h3>' + feature.properties.name + '</h3>';
+                //html += '<table id="feature' + selected++ + '" style_="display:none;">\n';
+                html += '<table>\n';
+                for (const [prop, val] of Object.entries(feature.properties)) {
+                    if (prop == 'resources') {
+                        var res = JSON.parse(val);
+                        html += '<tr><td>' + prop + ': </td><td class="popval">';
+                        res.forEach(
+                            function (r) {
+                                var link = r.uri;
+                                if (typeof r.params !== 'undefined') {
+                                    link += "?";
+                                    for (let p of r.params) {
+                                        link += p + "=" + values[p] + "&";
+                                    }
+                                }
+                                html += '<a href="' + link + '">' + r.description + '</a><br>';
+                            }
+                        )
+                        html += '</td></tr>\n';
+                    } else {
+                        html += '<tr><td>' + prop + ': </td><td class="popval">' + val + '</td></tr>';
+                    }
+                }
+                html += '</table></div>';
+            }
+            //document.getElementById('feature0').style.display = '';
+
+            //if (e.features.length > 1) {
+            //    html += '<p style="align:center"><a>prev</a> <a>next</a></p>';
+            //}
+            return html;
+        }
+        //document.getElementById("popupTop").scrollIntoView();
+    </script>
+
+
+<a name='___top' class='dummyTopAnchor' ></a>
+
+<div class='indexgroup'>
+<ul   class='indexList indexList1'>
+  <li class='indexItem indexItem1'><a href='#NAME'>NAME</a>
+  <li class='indexItem indexItem1'><a href='#DESCRIPTION'>DESCRIPTION</a>
+  <li class='indexItem indexItem1'><a href='#DATA_FORMATS'>DATA FORMATS</a>
+  <ul   class='indexList indexList2'>
+    <li class='indexItem indexItem2'><a href='#JSON_format_and_variables'>JSON format and variables</a>
+    <li class='indexItem indexItem2'><a href='#XML_format'>XML format</a>
+    <li class='indexItem indexItem2'><a href='#Weather_icons'>Weather icons</a>
+    <ul   class='indexList indexList3'>
+      <li class='indexItem indexItem3'><a href='#Wind_symbols'>Wind symbols</a>
+    </ul>
+    <li class='indexItem indexItem2'><a href='#UV_index'>UV index</a>
+  </ul>
+  <li class='indexItem indexItem1'><a href='#USAGE'>USAGE</a>
+  <ul   class='indexList indexList2'>
+    <li class='indexItem indexItem2'><a href='#Methods'>Methods</a>
+    <li class='indexItem indexItem2'><a href='#Parameters'>Parameters</a>
+    <li class='indexItem indexItem2'><a href='#Sample_request_URLs'>Sample request URLs</a>
+    <li class='indexItem indexItem2'><a href='#Status'>Status</a>
+    <li class='indexItem indexItem2'><a href='#Schema'>Schema</a>
+  </ul>
+  <li class='indexItem indexItem1'><a href='#AUTHENTICATION'>AUTHENTICATION</a>
+  <li class='indexItem indexItem1'><a href='#HISTORICAL_FORECASTS'>HISTORICAL FORECASTS</a>
+  <li class='indexItem indexItem1'><a href='#CHANGELOG'>CHANGELOG</a>
+  <ul   class='indexList indexList2'>
+    <li class='indexItem indexItem2'><a href='#Probabilities_added%3A_2021-05-10'>Probabilities added: 2021-05-10</a>
+    <li class='indexItem indexItem2'><a href='#Version_0.9_EOL%3A_2021-03-01'>Version 0.9 EOL: 2021-03-01</a>
+    <li class='indexItem indexItem2'><a href='#XML_updated_with_new_symbol_codes%3A_2020-12-14'>XML updated with new symbol codes: 2020-12-14</a>
+    <li class='indexItem indexItem2'><a href='#Version_2.0_out_of_beta%3A_2020-06-17'>Version 2.0 out of beta: 2020-06-17</a>
+    <li class='indexItem indexItem2'><a href='#Version_2.0_%3A_2020-06-10'>Version 2.0 : 2020-06-10</a>
+    <li class='indexItem indexItem2'><a href='#Version_2.0_%3A_2020-04-02'>Version 2.0 : 2020-04-02</a>
+    <li class='indexItem indexItem2'><a href='#Version_2.0_%3A_2020-01-17'>Version 2.0 : 2020-01-17</a>
+    <li class='indexItem indexItem2'><a href='#Version_1.9_%3A_2014-05-20'>Version 1.9 : 2014-05-20</a>
+    <li class='indexItem indexItem2'><a href='#Phase_out_version_1.5_%3A_2011-08-16'>Phase out version 1.5 : 2011-08-16</a>
+    <li class='indexItem indexItem2'><a href='#Version_1.8_%3A_2010-06-10'>Version 1.8 : 2010-06-10</a>
+    <li class='indexItem indexItem2'><a href='#Version_1.7_%3A_2010-03-03'>Version 1.7 : 2010-03-03</a>
+    <li class='indexItem indexItem2'><a href='#Version_1.6_%3A_2009-01-15'>Version 1.6 : 2009-01-15</a>
+    <li class='indexItem indexItem2'><a href='#Version_1.5_%3A_2008-05-30'>Version 1.5 : 2008-05-30</a>
+    <li class='indexItem indexItem2'><a href='#Version_1.4_%3A_2007-12-03'>Version 1.4 : 2007-12-03</a>
+    <li class='indexItem indexItem2'><a href='#Version_1.3_%3A_2007-09-12'>Version 1.3 : 2007-09-12</a>
+    <li class='indexItem indexItem2'><a href='#Version_1.2_%3A_2007-06-15'>Version 1.2 : 2007-06-15</a>
+    <li class='indexItem indexItem2'><a href='#Version_1.1_%3A_2007-04-25'>Version 1.1 : 2007-04-25</a>
+    <li class='indexItem indexItem2'><a href='#Version_1.0_%3A_2007-05-15'>Version 1.0 : 2007-05-15</a>
+  </ul>
+</ul>
+</div>
+
+<h2><a class='u' href='#___top' title='click to go to top of document'
+name="NAME"
+>NAME</a></h2>
+
+<p><b>Locationforecast</b> - Weather forecasts for any location on earth</p>
+
+<h2><a class='u' href='#___top' title='click to go to top of document'
+name="DESCRIPTION"
+>DESCRIPTION</a></h2>
+
+<p>This service delivers weather forecasts for any given coordinate for the next nine days,
+in JSON and (deprecated) XML formats.
+There are several variants with different parameters,
+with most data for the Nordic region.</p>
+
+<p>For up-to-date precipitation forecasts,
+see our <b>Nowcast</b> service which is updated every five minures.
+The service is not suitable for forecasts above ground level.
+For aviation purposes,
+please see our <b>IsobaricGRIB</b> service.</p>
+
+<p>For more information see the <a href="https://docs.api.met.no/doc/locationforecast/datamodel.html" class="podlinkurl"
+>Locationforecast data model</a>.</p>
+
+<h2><a class='u' href='#___top' title='click to go to top of document'
+name="DATA_FORMATS"
+>DATA FORMATS</a></h2>
+
+<h3><a class='u' href='#___top' title='click to go to top of document'
+name="JSON_format_and_variables"
+>JSON format and variables</a></h3>
+<p>Version 2.0 defaults to JSON format for data.
+For an explanation of the various variables, see the
+<a href="/doc/locationforecast/datamodel">Datamodel</a> documentation.
+The JSON format is described in the
+<a href="/doc/ForecastJSON">General Forecast Format</a> documentation.
+</p>
+
+
+<h3><a class='u' href='#___top' title='click to go to top of document'
+name="XML_format"
+>XML format</a></h3>
+
+<p>For those who want to continue using their existing clients with a minimum of changes,
+you can also continue using the old XML format.
+This must be accessed via the <code>classic</code> method,
+like this:</p>
+
+<pre>    <a href='https://api.met.no/weatherapi/locationforecast/2.0/classic?lat=59.93&#38;lon=10.72&#38;altitude=90'><code>https://api.met.no/weatherapi/locationforecast/2.0/classic?lat=59.93&#38;lon=10.72&#38;altitude=90</code></a></pre>
+
+<p><b>Note that the <code>msi</code> parameter is now called <code>altitude</code> in 2.0.</b></p>
+
+<p>The XML format is considered legacy, and as similar to 1.9 as possible except for additional time periods and the XML Schema URI. Future enhancements will primarily be added to the JSON format.</p>
+
+<p>Also, some elements will be removed when version 1.9 is terminated, including the following elements:</p>
+
+<pre>    &#60;temperatureProbability unit=&#34;probabilitycode&#34; value=&#34;0&#34;/&#62;
+    &#60;windProbability unit=&#34;probabilitycode&#34; value=&#34;0&#34;/&#62;
+    &#60;symbolProbability unit=&#34;probabilitycode&#34; value=&#34;1&#34;/&#62;</pre>
+
+<h3><a class='u' href='#___top' title='click to go to top of document'
+name="Weather_icons"
+>Weather icons</a></h3>
+
+<p>Along with the new JSON format we also have a new set of weather icons, in PNG, SVG and PDF formats. They can be downloaded from <a href="https://github.com/metno/weathericons/" class="podlinkurl"
+>GitHub</a>.</p>
+
+<p>The filename (minus extension) corresponds to the <code>symbol_code</code> in the JSON format, including variations for day, night and polar day. This means there is no need for calculations or fetching data from the Sunrise service in order to present the correct weather icons. This has also been added to the XML as an attribute <code>code</code> to the <code>symbol</code> element:</p>
+
+<pre>    &#60;symbol id=&#34;PartlyCloud&#34; number=&#34;3&#34; code=&#34;partlycloudy_day&#34;&#62;&#60;/symbol&#62;</pre>
+
+<p><b>Note:</b> There is a typing error in <code>lightssleetshowersandthunder</code> and <code>lightssnowshowersandthunder</code> (extra &#34;s&#34; after &#34;light&#34;). Unfortunately, correcting this would mean breaking existing applications, so it has been postponed to the next version of weathericon/locationforecast.</p>
+
+<h4><a class='u' href='#___top' title='click to go to top of document'
+name="Wind_symbols"
+>Wind symbols</a></h4>
+
+<p>Wind direction denote where the wind is coming from, where 0&#176; is north, 90&#176; east, etc. For GUI applications use we suggest using arrows, like these:</p>
+
+<dl>
+<dt><a name="_"
+>&#11015;</a></dt>
+
+<dd>
+<p>0&#176; (north)</p>
+
+<dt><a name="_"
+>&#11013;</a></dt>
+
+<dd>
+<p>90&#176; (east)</p>
+
+<dt><a name="_"
+>&#11014;</a></dt>
+
+<dd>
+<p>180&#176; (south)</p>
+
+<dt><a name="_"
+>&#10145;</a></dt>
+
+<dd>
+<p>270&#176; (west)</p>
+</dd>
+</dl>
+
+<h3><a class='u' href='#___top' title='click to go to top of document'
+name="UV_index"
+>UV index</a></h3>
+
+<p>The new format also includes UV radiation forecasts per location, to replace the old graphical UVforecast product. For those wanting UV maps these can be downloaded directly from <a href="https://atmosphere.copernicus.eu/sample-cams-products-echo" class="podlinkurl"
+>CAMS</a>.</p>
+
+<h2><a class='u' href='#___top' title='click to go to top of document'
+name="USAGE"
+>USAGE</a></h2>
+
+<h3><a class='u' href='#___top' title='click to go to top of document'
+name="Methods"
+>Methods</a></h3>
+
+<dl>
+<dt><a name="/complete"
+>/complete</a></dt>
+
+<dd>
+<p>JSON forecast with all values. This will shortly be expanded with probabilities, so that each variable will be repeated for a set of percentiles.</p>
+
+<dt><a name="/compact"
+>/compact</a></dt>
+
+<dd>
+<p>A shorter version with only the most used parameters (if you feel something is missing, please let us know)</p>
+
+<dt><a name="/classic"
+>/classic</a></dt>
+
+<dd>
+<p>The old XML format, now considered legacy. It matches the output of version 1.9 closely, but includes more time periods. Future new parameters will not be added to this version.</p>
+</dd>
+</dl>
+
+<h3><a class='u' href='#___top' title='click to go to top of document'
+name="Parameters"
+>Parameters</a></h3>
+
+<dl>
+<dt><a name="lat"
+>lat</a></dt>
+
+<dd>
+<p>latitude in decimal degrees, mandatory</p>
+
+<dt><a name="lon"
+>lon</a></dt>
+
+<dd>
+<p>longtitude in decimal degrees, mandatory</p>
+
+<dt><a name="altitude"
+>altitude</a></dt>
+
+<dd>
+<p>Ground surface height above (or sometimes below) sea level in whole meters (integers). Optional but recommended for precise temperature values. When missing the internal topography model is used for temperature correction, which is rather course and may be incorrect in hilly terrain.</p>
+
+<p><b>Note</b> that this is the altitude of the <b>ground surface</b>! You cannot use this to ask for atmospheric predictions, e.g. for aviation purposes.</p>
+</dd>
+</dl>
+
+<h3><a class='u' href='#___top' title='click to go to top of document'
+name="Sample_request_URLs"
+>Sample request URLs</a></h3>
+
+<pre>    <a href='https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=60.10&#38;lon=9.58'><code>https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=60.10&#38;lon=9.58</code></a>                             # JSON
+    <a href='https://api.met.no/weatherapi/locationforecast/2.0/complete?lat=-16.516667&#38;lon=-68.166667&#38;altitude=4150'><code>https://api.met.no/weatherapi/locationforecast/2.0/complete?lat=-16.516667&#38;lon=-68.166667&#38;altitude=4150</code></a>   # El Alto, Bolivia
+    <a href='https://api.met.no/weatherapi/locationforecast/2.0/classic?lat=60.10&#38;lon=9.58'><code>https://api.met.no/weatherapi/locationforecast/2.0/classic?lat=60.10&#38;lon=9.58</code></a>                             # Classic XML</pre>
+
+<h3><a class='u' href='#___top' title='click to go to top of document'
+name="Status"
+>Status</a></h3>
+
+<p>Operational status for the model can be checked like this:</p>
+
+<pre>    <a href='https://api.met.no/weatherapi/locationforecast/2.0/status'><code>https://api.met.no/weatherapi/locationforecast/2.0/status</code></a></pre>
+
+<h3><a class='u' href='#___top' title='click to go to top of document'
+name="Schema"
+>Schema</a></h3>
+
+<p>The XML Schema is available at <a href='https://api.met.no/weatherapi/locationforecast/2.0/schema'><code>https://api.met.no/weatherapi/locationforecast/2.0/schema</code></a></p>
+
+<p>Schema for the JSON format is included in the OpenAPI spec:</p>
+
+<pre>    <a href='https://api.met.no/weatherapi/locationforecast/2.0/swagger'><code>https://api.met.no/weatherapi/locationforecast/2.0/swagger</code></a></pre>
+
+<h2><a class='u' href='#___top' title='click to go to top of document'
+name="AUTHENTICATION"
+>AUTHENTICATION</a></h2>
+
+<p>Due to poor adherence to the identification requirements in the Terms of Service, we have implemented more stringent checks on sending a unique identifier in the User-Agent header. Any requests with a prohibited or missing User-Agent will receive a 403 Forbidden error.</p>
+
+<p>Examples of banned User-Agents include:</p>
+
+<ul>
+<li>okhttp</li>
+
+<li>Dalvik</li>
+
+<li>fhttp</li>
+
+<li>Java</li>
+</ul>
+
+<h2><a class='u' href='#___top' title='click to go to top of document'
+name="HISTORICAL_FORECASTS"
+>HISTORICAL FORECASTS</a></h2>
+
+<p>While we only serve current forecasts via the API, you can find historical forecast model data in NetCDF format on <a href="https://thredds.met.no/thredds/metno.html" class="podlinkurl"
+>https://thredds.met.no/thredds/metno.html</a>.</p>
+
+<p>Due to licensing issues we can only distribute model data for the Nordic and Arctic regions. For global model data, please contact ECMWF.</p>
+
+<h2><a class='u' href='#___top' title='click to go to top of document'
+name="CHANGELOG"
+>CHANGELOG</a></h2>
+
+<h3><a class='u' href='#___top' title='click to go to top of document'
+name="Probabilities_added:_2021-05-10"
+>Probabilities added: 2021-05-10</a></h3>
+
+<p>As a replacement for the deprecated Probabilityforecast product (to be removed on 2021-07-01), we have added some new variables to the <code>complete.json</code> forecast:</p>
+
+<pre>    air_temperature_percentile_10
+    air_temperature_percentile_90
+    wind_speed_percentile_10
+    wind_speed_percentile_90</pre>
+
+<h3><a class='u' href='#___top' title='click to go to top of document'
+name="Version_0.9_EOL:_2021-03-01"
+>Version 0.9 EOL: 2021-03-01</a></h3>
+
+<p>After having been deprecated for 9 months, version 0.9 will finally be removed on March 1st, 2021.</p>
+
+<h3><a class='u' href='#___top' title='click to go to top of document'
+name="XML_updated_with_new_symbol_codes:_2020-12-14"
+>XML updated with new symbol codes: 2020-12-14</a></h3>
+
+<p>Since Weathericon/1.1 is deprecated, we have added an attribute <code>code</code> to the <code>symbol</code> element, corresponding to the filename in Weathericon/2.0.</p>
+
+<h3><a class='u' href='#___top' title='click to go to top of document'
+name="Version_2.0_out_of_beta:_2020-06-17"
+>Version 2.0 out of beta: 2020-06-17</a></h3>
+
+<ul>
+<li>Version 1.9 will probably be available until 1 Dec 2020. Please follow our mailing list for more details.</li>
+</ul>
+
+<h3><a class='u' href='#___top' title='click to go to top of document'
+name="Version_2.0_:_2020-06-10"
+>Version 2.0 : 2020-06-10</a></h3>
+
+<ul>
+<li>Removed &#34;/&#34; endpoint, must now use complete/compact/classic</li>
+</ul>
+
+<h3><a class='u' href='#___top' title='click to go to top of document'
+name="Version_2.0_:_2020-04-02"
+>Version 2.0 : 2020-04-02</a></h3>
+
+<ul>
+<li>Beta period nearing completion.</li>
+
+<li>XML is now split into different &#34;classic&#34; method.</li>
+
+<li>Stricter controls on User-Agent header to avoid throttling.</li>
+</ul>
+
+<h3><a class='u' href='#___top' title='click to go to top of document'
+name="Version_2.0_:_2020-01-17"
+>Version 2.0 : 2020-01-17</a></h3>
+
+<ul>
+<li>Beta version of new locationforecast based on FORTI instead of WDB</li>
+</ul>
+
+<h3><a class='u' href='#___top' title='click to go to top of document'
+name="Version_1.9_:_2014-05-20"
+>Version 1.9 : 2014-05-20</a></h3>
+
+<ul>
+<li>New version 1.9. Old version, 1.8, will expire on 2014-09-09</li>
+
+<li>new weather symbols are added for finer scale representation of the weather situation, see https://api.met.no/weatherapi/weathericon/1.1/documentation .</li>
+
+<li>weather symbol ids changed to CamelCase</li>
+
+<li>&#34;celcius&#34; unit name corrected to &#34;celsius&#34;</li>
+</ul>
+
+<h3><a class='u' href='#___top' title='click to go to top of document'
+name="Phase_out_version_1.5_:_2011-08-16"
+>Phase out version 1.5 : 2011-08-16</a></h3>
+
+<ul>
+<li>version 1.5 of locationforecast will expire at 2011-10-01. Note that log entry below stating that version 1.5 will be available until version 1.9 is released is no longer correct.</li>
+</ul>
+
+<h3><a class='u' href='#___top' title='click to go to top of document'
+name="Version_1.8_:_2010-06-10"
+>Version 1.8 : 2010-06-10</a></h3>
+
+<ul>
+<li>New attributes for the precipitation element: minvalue, maxvalue and probability. Note that these attributes will only be available for locations in a limited area in Europe.</li>
+
+<li>1.8 is meant as a transitional version, you may use 1.5 until we release version 1.9.</li>
+
+<li>Version 1.7 will be available until 2010-10-01.</li>
+</ul>
+
+<h3><a class='u' href='#___top' title='click to go to top of document'
+name="Version_1.7_:_2010-03-03"
+>Version 1.7 : 2010-03-03</a></h3>
+
+<ul>
+<li>Precipitation and symbol values for the first time intervals have been missing in all earlier versions. This has now been corrected.</li>
+
+<li>1.7 is meant as a transitional version, you may use 1.5 until we release version 1.8.</li>
+
+<li>Version 1.6 will be available until 2010-09-01.</li>
+</ul>
+
+<h3><a class='u' href='#___top' title='click to go to top of document'
+name="Version_1.6_:_2009-01-15"
+>Version 1.6 : 2009-01-15</a></h3>
+
+<ul>
+<li>1.6 is meant as a transitional version, meaning that you may use 1.5 until we release version 1.8.</li>
+
+<li>probability elements added.</li>
+
+<li>fewer elements available for EC-data.</li>
+</ul>
+
+<h3><a class='u' href='#___top' title='click to go to top of document'
+name="Version_1.5_:_2008-05-30"
+>Version 1.5 : 2008-05-30</a></h3>
+
+<ul>
+<li>new element, humidity, added to location.</li>
+
+<li>version 1.4 will expire 2008-11-01.</li>
+</ul>
+
+<h3><a class='u' href='#___top' title='click to go to top of document'
+name="Version_1.4_:_2007-12-03"
+>Version 1.4 : 2007-12-03</a></h3>
+
+<ul>
+<li>changes in <code>&#60;model&#62;</code> element: Added attribute termin, replaced attribute timespan with the attributes from and to.</li>
+
+<li>version 1.3 will be available up to and including 2008-03-01.</li>
+</ul>
+
+<h3><a class='u' href='#___top' title='click to go to top of document'
+name="Version_1.3_:_2007-09-12"
+>Version 1.3 : 2007-09-12</a></h3>
+
+<ul>
+<li>New version, 1.3, available.</li>
+
+<li>v1.3 includes element <code>&#60;meta&#62;</code>, with info about the forecast models.</li>
+
+<li>v1.2 will be available up to and including 2007-11-15.</li>
+</ul>
+
+<h3><a class='u' href='#___top' title='click to go to top of document'
+name="Version_1.2_:_2007-06-15"
+>Version 1.2 : 2007-06-15</a></h3>
+
+<ul>
+<li>New version, 1.2, available.</li>
+
+<li>Version 1.1 will be available up to and including 2007-10-02.</li>
+
+<li>Added xml-elements: fog and low/middle/high - clouds.</li>
+
+<li>Value of xml-element &#39;temperature&#39; now originates from a different model-parameter.</li>
+</ul>
+
+<h3><a class='u' href='#___top' title='click to go to top of document'
+name="Version_1.1_:_2007-04-25"
+>Version 1.1 : 2007-04-25</a></h3>
+
+<ul>
+<li>Locationforecast has now limited access</li>
+
+<li>Locationforecast is might return the XML as plain xml or zipped.</li>
+</ul>
+
+<h3><a class='u' href='#___top' title='click to go to top of document'
+name="Version_1.0_:_2007-05-15"
+>Version 1.0 : 2007-05-15</a></h3>
+
+<ul>
+<li>Initial release version</li>
+</ul>
+
+  </div>
+
+  <div class="tab-pane fade swagger-section" id="ex1-tabs-2" role="tabpanel" aria-labelledby="ex1-tab-2">
+
+
+<script type="text/javascript">
+  $(function () {
+    var url = window.location.search.match(/url=([^&]+)/);
+    if (url && url.length > 1) {
+      url = decodeURIComponent(url[1]);
+    } else {
+      url = "https://api.met.no/weatherapi/locationforecast/2.0/swagger";
+    }
+    window.swaggerUi = new SwaggerUi({
+      url: url,
+      dom_id: "swagger-ui-container",
+      supportedSubmitMethods: ['get', 'post', 'put', 'delete', 'patch'],
+      onComplete: function(swaggerApi, swaggerUi){
+        if(typeof initOAuth == "function") {
+          /*
+          initOAuth({
+            clientId: "your-client-id",
+            realm: "your-realms",
+            appName: "your-app-name"
+          });
+          */
+        }
+
+        $('pre code').each(function(i, e) {
+          hljs.highlightBlock(e)
+        });
+
+        //addApiKeyAuthorization();
+      },
+      onFailure: function(data) {
+        log("Unable to Load SwaggerUI");
+      },
+      docExpansion: "list",
+      sorter : "alpha",
+      validatorUrl: null
+    });
+
+
+    window.swaggerUi.load();
+
+    function log() {
+      if ('console' in window) {
+        console.log.apply(console, arguments);
+      }
+    }
+  });
+</script>
+
+<div id="message-bar" class="swagger-ui-wrap">&nbsp;</div>
+<div id="swagger-ui-container" class="swagger-ui-wrap"></div>
+
+  </div><!--swagger ui-->
+
+  <div class="tab-pane fade pod documentation" id="ex1-tabs-3" role="tabpanel" aria-labelledby="ex1-tab-3">
+      <h2>Changelog</h2>
+      <script type="text/javascript">
+        $(window).load(function(){
+            $('#ex1-tabs-1 .indexgroup ul.indexList1 > li:last-of-type').remove();
+            var log_elm = $('#ex1-tabs-1 > h2:last-of-type');
+            log_elm.nextAll().each(function () {
+                $(this).appendTo("#ex1-tabs-3");
+            });
+            log_elm.remove();
+        });
+      </script>
+  </div>
+
+  <div class="tab-pane fade documentation" id="ex1-tabs-4" role="tabpanel" aria-labelledby="ex1-tab-4">
+
+        <h2 id="furtherdocumentation">Further documentation</h2>
+
+<ul>
+<li><a href="/doc/locationforecast/HowTO">HOWTO</a></li>
+<li><a href="/doc/locationforecast/datamodel">Locationforecast data model</a></li>
+<li><a href="/doc/ForecastJSON">General point forecast JSON format</a></li>
+<li><a href="/doc/locationforecast/FAQ">Locationforecast FAQ</a></li>
+<li><a href="/doc/ClientLibraries">Third party libraries</a></li>
+</ul>
+
+  </div>
+
+</div>
+<!-- Tabs content -->
+
+
+    </div>
+  </div>
+</div>
+
+    </div>
+  </main>
+  <!--Main layout-->
+
+  <footer class="text-lg-start met-footer">
+    <div id="copyright" class="text-center p-3">
+      © 2022 Copyright:
+      <a class="text-light" href="https://met.no/">MET Norway</a>
+    </div>
+  </footer>
+
+  <!-- MDB -->
+  <script type="text/javascript" src="/js/mdb.min.js"></script>
+  <!-- Custom scripts -->
+  <script type="text/javascript" src="/js/script.js"></script>
+</body>
+</html>
