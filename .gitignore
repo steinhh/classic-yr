@@ -209,3 +209,4 @@ __marimo__/
 # User-added
 /chats
 /src/classic_yr/data
+/.matplotlib
