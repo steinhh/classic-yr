@@ -240,6 +240,8 @@ def _draw_wind_arrow(
         arrowstyle="-|>,head_width=1.5,head_length=2.5",
         color="lightgray",
         linewidth=0.7,
+        shrinkA=0,
+        shrinkB=0,
         zorder=6,
         clip_on=False,
     )
