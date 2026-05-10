@@ -156,9 +156,11 @@ def _draw_weather_symbol(
                 clip_on=True,
             )
     elif cloud_pct <= 20:
+        # Align sun center with partly cloudy symbol
+        sx, sy = x_ax - r * 0.40, y_ax + r / ar * 0.42
         ax.add_patch(
             Ellipse(
-                (x_ax, y_ax),
+                (sx, sy),
                 width=2 * r,
                 height=2 * r / ar,
                 facecolor="gold",
@@ -610,7 +612,23 @@ def plot_forecast(location: str) -> None:
 
         sym_day += timedelta(hours=2)
 
-    plt.show()
+    # Save to figs/{location}.png (relative to script)
+    from pathlib import Path
+
+    figs_dir = Path(__file__).resolve().parent / "figs"
+    figs_dir.mkdir(parents=True, exist_ok=True)
+    out_path = figs_dir / f"{location}.png"
+    fig.savefig(out_path, dpi=150, bbox_inches="tight")
+
+    # Rsync figs/ to remote server
+    import subprocess
+
+    script_dir = Path(__file__).resolve().parent
+    subprocess.run(
+        ["rsync", "-av", "figs/", "sertan.uio.no:sf/open/weather/"],
+        cwd=script_dir,
+        check=True,
+    )
 
 
 def main() -> None:
