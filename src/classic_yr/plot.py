@@ -224,14 +224,14 @@ def _draw_wind_arrow(
             force = i
             break
 
-    # Shaft half-length (decreased overall size by ~30%)
+    # Shaft: centred on (x_ax, y_ax), half-length = half_n * shaft_l
     shaft_l = 0.0042
+    half_n = 1.65
     dx = shaft_l * np.cos(to_angle)
     dy = shaft_l * np.sin(to_angle) / ar
 
-    # Extend tail backwards a bit more so the barbs fit nicely
-    tail_x, tail_y = x_ax - dx * 1.9, y_ax - dy * 1.9
-    tip_x, tip_y = x_ax + dx, y_ax + dy
+    tail_x, tail_y = x_ax - dx * half_n, y_ax - dy * half_n
+    tip_x, tip_y = x_ax + dx * half_n, y_ax + dy * half_n
 
     arrow = FancyArrowPatch(
         (tail_x, tail_y),
@@ -245,12 +245,12 @@ def _draw_wind_arrow(
     )
     ax.add_patch(arrow)
 
-    # Smaller barbs (~30% smaller than previous)
+    # Barbs spaced evenly from tail to centre so the last barb meets the tail
     barb_dx = (-np.sin(to_angle) * 0.0034) - (np.cos(to_angle) * 0.0014)
     barb_dy = (np.cos(to_angle) * 0.0034 / ar) - (np.sin(to_angle) * 0.0014 / ar)
 
-    step_dx = dx * 2 / max(1, force) * 0.8
-    step_dy = dy * 2 / max(1, force) * 0.8
+    step_dx = dx * half_n / max(1, force)
+    step_dy = dy * half_n / max(1, force)
 
     for i in range(force):
         bx = tail_x + i * step_dx
@@ -440,7 +440,7 @@ def plot_forecast(location: str) -> None:
                 fontsize=7,
                 color="lightgray",
                 annotation_clip=False,
-                xytext=(0, -38),  # Push further down
+                xytext=(0, -48),  # Push further down
                 textcoords="offset points",
             )
         d += timedelta(days=1)
@@ -522,7 +522,7 @@ def plot_forecast(location: str) -> None:
                 if pd.notna(df["wind_from_direction"].iloc[nearest_idx])
                 else 0.0
             )
-            _draw_wind_arrow(ax_t, x_ax, -0.075, w_speed, w_dir, ar)
+            _draw_wind_arrow(ax_t, x_ax, -0.12, w_speed, w_dir, ar)
 
         sym_day += timedelta(hours=2)
 
