@@ -6,12 +6,13 @@ import csv
 import json
 import logging
 import sys
+import zoneinfo
 from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
 from pathlib import Path
 from typing import Any, cast
 
-import requests  #  type: ignore [import-untyped]
+import requests  # type: ignore[import-untyped]
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
@@ -23,12 +24,16 @@ LON = 10.7522
 ALTITUDE = 23  # metres above sea level
 
 API_URL = "https://api.met.no/weatherapi/locationforecast/2.0/complete"
+SUNRISE_API_URL = "https://api.met.no/weatherapi/sunrise/3.0/sun"
+
+OSLO_TZ = zoneinfo.ZoneInfo("Europe/Oslo")
 
 # Identifies this application per Yr Terms of Service: must include app name and contact info.
 USER_AGENT = "classic-yr/0.1.0 https://github.com/steinhh/classic-yr"
 
 CSV_FIELDS = [
     "time",
+    "day_or_night",
     # Instant variables
     "air_temperature",
     "air_temperature_percentile_10",
@@ -54,6 +59,99 @@ CSV_FIELDS = [
     "probability_of_precipitation",
     "probability_of_thunder",
 ]
+
+
+def _fetch_sunrise_sunset_for_date(
+    date_str: str,
+    lat: float = LAT,
+    lon: float = LON,
+) -> tuple[datetime, datetime] | None:
+    """Fetch sunrise and sunset UTC times for a given date and location.
+
+    Args:
+        date_str: Date in YYYY-MM-DD format (local Oslo date).
+        lat: Latitude.
+        lon: Longitude.
+
+    Returns:
+        Tuple of (sunrise_utc, sunset_utc) as UTC-aware datetimes, or None on failure.
+    """
+    naive_dt = datetime.strptime(date_str, "%Y-%m-%d")
+    local_dt = naive_dt.replace(tzinfo=OSLO_TZ)
+    utc_offset = local_dt.utcoffset()
+    if utc_offset is None:
+        return None
+    total_seconds = int(utc_offset.total_seconds())
+    sign = "+" if total_seconds >= 0 else "-"
+    abs_sec = abs(total_seconds)
+    offset_str = f"{sign}{abs_sec // 3600:02d}:{(abs_sec % 3600) // 60:02d}"
+
+    try:
+        params: dict[str, str | float] = {
+            "lat": lat,
+            "lon": lon,
+            "date": date_str,
+            "offset": offset_str,
+        }
+        resp = requests.get(
+            SUNRISE_API_URL,
+            params=params,
+            headers={"User-Agent": USER_AGENT},
+            timeout=30,
+        )
+        resp.raise_for_status()
+    except requests.RequestException as exc:
+        logger.warning("Sunrise API error for %s: %s", date_str, exc)
+        return None
+
+    props = resp.json().get("properties", {})
+    sunrise_str: str = props.get("sunrise", {}).get("time", "")
+    sunset_str: str = props.get("sunset", {}).get("time", "")
+    if not sunrise_str or not sunset_str:
+        return None
+
+    sunrise_utc = datetime.fromisoformat(sunrise_str).astimezone(timezone.utc)
+    sunset_utc = datetime.fromisoformat(sunset_str).astimezone(timezone.utc)
+    return sunrise_utc, sunset_utc
+
+
+def add_day_night_column(
+    rows: list[dict[str, str]],
+    lat: float = LAT,
+    lon: float = LON,
+) -> None:
+    """Add a ``day_or_night`` value to each forecast row in-place.
+
+    Fetches sunrise/sunset from the Yr sunrise API for each unique local date
+    and marks each row as ``'day'`` (between sunrise and sunset) or ``'night'``.
+
+    Args:
+        rows: Forecast rows from :func:`parse_timeseries`; modified in-place.
+        lat: Latitude of the location.
+        lon: Longitude of the location.
+    """
+    date_cache: dict[str, tuple[datetime, datetime] | None] = {}
+
+    for row in rows:
+        time_str = row["time"]
+        try:
+            utc_dt = datetime.fromisoformat(time_str.replace("Z", "+00:00"))
+        except ValueError:
+            row["day_or_night"] = ""
+            continue
+
+        local_dt = utc_dt.astimezone(OSLO_TZ)
+        date_str = local_dt.strftime("%Y-%m-%d")
+
+        if date_str not in date_cache:
+            date_cache[date_str] = _fetch_sunrise_sunset_for_date(date_str, lat, lon)
+
+        sun = date_cache[date_str]
+        if sun is None:
+            row["day_or_night"] = ""
+        else:
+            sunrise_utc, sunset_utc = sun
+            row["day_or_night"] = "day" if sunrise_utc <= utc_dt < sunset_utc else "night"
 
 
 def _data_dir() -> Path:
@@ -317,6 +415,7 @@ def main() -> None:
         sys.exit(1)
 
     rows = parse_timeseries(data)
+    add_day_night_column(rows)
     added = update_csv(rows, csv_path)
     logger.info("Done. %d row(s) added.", added)
 

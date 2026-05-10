@@ -141,9 +141,10 @@ def _draw_weather_symbol(
         precip: Precipitation amount in mm.
     """
     r = 0.0043  # base half-width in axes x-fraction (1/3 of original)
+    rc = r * 1.2  # cloud radius (20% larger than sun/rain reference)
 
     if precip > 0:
-        _draw_cloud(ax, x_ax, y_ax + r / ar * 0.35, r, ar, "lightsteelblue")
+        _draw_cloud(ax, x_ax, y_ax + rc / ar * 0.35, rc, ar, "lightsteelblue")
         for ddx in (-0.6, 0.0, 0.6):
             ax.plot(
                 [x_ax + ddx * r, x_ax + ddx * r - 0.15 * r],
@@ -168,9 +169,9 @@ def _draw_weather_symbol(
             )
         )
     elif cloud_pct <= 80:
-        # Partly cloudy: small sun (upper-left) + cloud in front
-        sx, sy = x_ax - r * 0.35, y_ax + r / ar * 0.38
-        sr = r * 0.65
+        # Partly cloudy: full-size sun (upper-left) + cloud in front
+        sx, sy = x_ax - r * 0.40, y_ax + r / ar * 0.42
+        sr = r
         ax.add_patch(
             Ellipse(
                 (sx, sy),
@@ -183,9 +184,9 @@ def _draw_weather_symbol(
                 clip_on=True,
             )
         )
-        _draw_cloud(ax, x_ax + r * 0.12, y_ax - r / ar * 0.12, r * 0.9, ar, "white")
+        _draw_cloud(ax, x_ax + rc * 0.12, y_ax - rc / ar * 0.12, rc * 0.9, ar, "white")
     else:
-        _draw_cloud(ax, x_ax, y_ax, r, ar, "lightgray")
+        _draw_cloud(ax, x_ax, y_ax, rc, ar, "lightgray")
 
 
 def _draw_wind_arrow(
