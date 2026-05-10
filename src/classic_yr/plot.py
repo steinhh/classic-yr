@@ -315,12 +315,31 @@ def _aligned_precip_ylim(
     p_raw = float(np.nanmax(precip_max_arr)) if np.any(precip_max_arr > 0) else 1.0
     # Round up to one decimal place and add 10 % headroom
     p_top = np.ceil(p_raw * 10) / 10 * 1.1
-    # We want n_ticks - 1 equal intervals.  The bottom is always 0, and the
-    # top just needs to be positive ? LinearLocator will produce n_ticks ticks
-    # from 0 to p_top regardless of the temperature range, so gridlines align
-    # automatically when both axes use the same LinearLocator numticks.
+    # Ensure each tick interval is at least 1 mm: with n_ticks ticks the
+    # interval is p_top / (n_ticks - 1).  n_ticks is not available here, so
+    # we expose a parameter and the caller passes it.
     _ = temp_ylim
     return (0.0, float(p_top))
+
+
+def _precip_ylim_min1mm(
+    precip_max_arr: np.ndarray,
+    temp_ylim: tuple[float, float],
+    n_ticks: int,
+) -> tuple[float, float]:
+    """Like ``_aligned_precip_ylim`` but guarantees >= 1 mm per tick interval.
+
+    Args:
+        precip_max_arr: Array of maximum-precipitation values.
+        temp_ylim: Temperature axis limits (unused; kept for signature parity).
+        n_ticks: Number of ticks (same as temperature axis).
+
+    Returns:
+        ``(0, p_top)`` with p_top >= n_ticks - 1.
+    """
+    _0, p_top = _aligned_precip_ylim(precip_max_arr, temp_ylim)
+    min_top = float(n_ticks - 1)  # at least 1 mm per interval
+    return (0.0, max(p_top, min_top))
 
 
 def plot_forecast(location: str) -> None:
@@ -406,10 +425,44 @@ def plot_forecast(location: str) -> None:
     ax_t.yaxis.set_major_formatter(ticker.FuncFormatter(lambda v, _: f"{v:.0f}\u00b0C"))
 
     # ----------------------------------------- precipitation axis limits / ticks
-    p_lo, p_hi = _aligned_precip_ylim(precip_max, (t_lo, t_hi))
+    p_lo, p_hi = _precip_ylim_min1mm(precip_max, (t_lo, t_hi), n_ticks)
     ax_p.set_ylim(p_lo, p_hi)
     ax_p.yaxis.set_major_locator(ticker.LinearLocator(numticks=n_ticks))
     ax_p.yaxis.set_major_formatter(ticker.FuncFormatter(lambda v, _: f"{v:.1f} mm"))
+
+    # -------------------------------- per-bar mm labels (expected / max)
+    p_tick_interval = p_hi / (n_ticks - 1)  # mm per tick
+    label_offset = p_tick_interval * 0.06  # small gap above bar top
+    for bt, pv, pm in zip(bar_times, precip, precip_max):
+        bar_centre = bt + bar_width / 2
+        if pv > 0 or pm > 0:
+            top = max(pv, pm)
+            # Expected precipitation
+            if pv > 0:
+                ax_p.text(
+                    bar_centre,
+                    pv + label_offset,
+                    f"{pv:.1f}",
+                    ha="center",
+                    va="bottom",
+                    fontsize=6.5,
+                    color="white",
+                    zorder=7,
+                    clip_on=False,
+                )
+            # Maximum precipitation (if different from expected)
+            if pm > 0 and abs(pm - pv) > 0.05:
+                ax_p.text(
+                    bar_centre,
+                    top + label_offset,
+                    f"({pm:.1f})",
+                    ha="center",
+                    va="bottom",
+                    fontsize=6.5,
+                    color="white",
+                    zorder=7,
+                    clip_on=False,
+                )
 
     # --------------------------------------------------------- y-axis grid
     ax_t.yaxis.grid(linestyle=":", color="gray", alpha=0.35, zorder=1)
