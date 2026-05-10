@@ -227,7 +227,7 @@ def plot_forecast(location: str) -> None:
 
     # ------------------------------------------------------------------ figure
     bg = "#16213e"
-    fig, ax_t = plt.subplots(figsize=(21, 4.5))
+    fig, ax_t = plt.subplots(figsize=(21, 5.175))
     fig.patch.set_facecolor(bg)
     ax_t.set_facecolor(bg)
 
@@ -332,44 +332,18 @@ def plot_forecast(location: str) -> None:
     ax_t.xaxis.set_minor_locator(mdates.HourLocator(byhour=range(2, 24, 2)))
     ax_t.grid(which="minor", axis="x", linestyle=":", color="gray", alpha=0.3, zorder=1)
 
-    # ------------------------------------- x-axis tick labels (major = midnight)
-    ax_t.xaxis.set_major_locator(mdates.DayLocator(tz=timezone.utc))
+    # Show every 4 hours (00, 04, ..., 20) as major ticks
+    ax_t.xaxis.set_major_locator(mdates.HourLocator(byhour=range(0, 24, 4), tz=timezone.utc))
 
-    def _x_label(_num: float, _pos: Any) -> str:
-        return "00"
+    def _x_label(num: float, _pos: Any) -> str:
+        dt = mdates.num2date(num)
+        return f"{dt.hour:02d}"
 
     ax_t.xaxis.set_major_formatter(ticker.FuncFormatter(_x_label))
     ax_t.tick_params(which="major", axis="x", labelsize=7, length=5, pad=2)
     ax_t.tick_params(which="minor", axis="x", labelsize=0, length=2)
 
-    # Place hour labels at every 4 hours (04, 08, 12, 16, 20); 00 is the major tick
-    start_day = first_dt
-    anno_y = ax_t.get_ylim()[0] - (t_hi - t_lo) * 0.07
-    for h in range(4, 24, 4):
-        d = start_day
-        while True:
-            candidate = d.replace(hour=h, minute=0, second=0, microsecond=0)
-            cnum = mdates.date2num(candidate)
-            if cnum < t_start:
-                d += timedelta(days=1)
-                continue
-            if cnum > t_end:
-                break
-            ax_t.annotate(
-                f"{h:02d}",
-                xy=(cnum, anno_y),
-                xycoords=("data", "axes fraction"),
-                ha="center",
-                va="top",
-                fontsize=6,
-                color="lightgray",
-                annotation_clip=False,
-                xytext=(0, -4),
-                textcoords="offset points",
-            )
-            d += timedelta(days=1)
-
-    # Day name annotations centred at noon of each day
+    # Day name annotations centred at noon of each day, placed just below the custom hour ticks
     d = first_dt
     while True:
         noon = d.replace(hour=12, minute=0, second=0, microsecond=0)
@@ -379,14 +353,14 @@ def plot_forecast(location: str) -> None:
         if noon_num >= t_start:
             ax_t.annotate(
                 noon.strftime("%a"),
-                xy=(noon_num, anno_y),
+                xy=(noon_num, 0.0),
                 xycoords=("data", "axes fraction"),
                 ha="center",
                 va="top",
                 fontsize=7,
                 color="lightgray",
                 annotation_clip=False,
-                xytext=(0, -14),
+                xytext=(0, -18),  # 18 points below the x-axis
                 textcoords="offset points",
             )
         d += timedelta(days=1)
