@@ -211,3 +211,4 @@ __marimo__/
 /src/classic_yr/data
 /.matplotlib
 /src/classic_yr/figs
+/.envrc~
